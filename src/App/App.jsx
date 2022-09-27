@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import { ContactForm } from '../components/ContactForm';
+import { Filter } from '../components/Filter';
+import { ContactList } from '../components/ContactList';
+import { nanoid } from 'nanoid';
 
 export class App extends Component {
   state = {
@@ -12,16 +15,58 @@ export class App extends Component {
     filter: '',
   };
 
-  formSubmitHandler = data => {
-    setTimeout(() => {
-      console.log('data', data);
-    }, 1000);
+  formSubmitHandler = ({ name, number }) => {
+    const contact = {
+      id: nanoid(),
+      name,
+      number,
+    };
+
+    const checkName = this.state.contacts.some(item =>
+      item.name.toLowerCase().includes(contact.name.toLowerCase())
+    );
+
+    checkName
+      ? alert(`${contact.name} is already in contacts`)
+      : this.setState(({ contacts }) => ({
+          contacts: [contact, ...contacts],
+        }));
+
+    //     this.setState(({ contacts }) => ({
+    //       contacts: contacts.some(item =>
+    //         item.name.toLowerCase().includes(contact.name.toLowerCase())
+    //           ? alert(`${contact.name} is already in contacts`)
+    //           : [contact, ...contacts]
+    //       ),
+    //     }));
   };
 
+  changeFilter = e => {
+    this.setState({ filter: e.target.value });
+  };
+
+  getFilteredItems = () => {
+    const { contacts, filter } = this.state;
+    const normilizedFilter = filter.toLowerCase();
+    return contacts.filter(item =>
+      item.name.toLowerCase().includes(normilizedFilter)
+    );
+  };
+
+  checkContact = e => {};
+
   render() {
+    const { filter } = this.state;
+    const filteredItem = this.getFilteredItems();
+
     return (
       <div>
+        <h1>Phonebook</h1>
         <ContactForm onSubmit={this.formSubmitHandler} />
+
+        <h2>Contacts</h2>
+        <Filter value={filter} onChange={this.changeFilter} />
+        <ContactList list={filteredItem} />
       </div>
     );
   }
